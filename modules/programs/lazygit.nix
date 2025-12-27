@@ -102,6 +102,17 @@ in
           }
         '';
 
+        zshIntegration = ''
+          function ${cfg.shellWrapperName}() {
+              export LAZYGIT_NEW_DIR_FILE=${lazygitNewDirFilePath}
+              command lazygit "$@"
+              if [ -f $LAZYGIT_NEW_DIR_FILE ]; then
+                cd "$(cat $LAZYGIT_NEW_DIR_FILE)"
+                rm -f $LAZYGIT_NEW_DIR_FILE > /dev/null
+              fi
+          }
+        '';
+
         fishIntegration = ''
           set -x LAZYGIT_NEW_DIR_FILE ${lazygitNewDirFilePath}
           command lazygit $argv
@@ -125,7 +136,7 @@ in
       {
         bash.initExtra = mkIf cfg.enableBashIntegration bashIntegration;
 
-        zsh.initContent = mkIf cfg.enableZshIntegration bashIntegration;
+        zsh.initContent = mkIf cfg.enableZshIntegration zshIntegration;
 
         fish.functions.${cfg.shellWrapperName} = mkIf cfg.enableFishIntegration fishIntegration;
 
